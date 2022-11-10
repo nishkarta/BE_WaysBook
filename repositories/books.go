@@ -8,6 +8,7 @@ import (
 
 type BookRepository interface {
 	FindBooks() ([]models.Book, error)
+	LatestBooks() ([]models.Book, error)
 	GetBookByID(ID int) (models.Book, error)
 	AddBook(book models.Book) (models.Book, error)
 	UpdateBook(book models.Book) (models.Book, error)
@@ -21,6 +22,13 @@ func RepositoryBook(db *gorm.DB) *repository {
 func (r *repository) FindBooks() ([]models.Book, error) {
 	var books []models.Book
 	err := r.db.Find(&books).Error
+
+	return books, err
+}
+func (r *repository) LatestBooks() ([]models.Book, error) {
+	var books []models.Book
+	// err := r.db.Limit(5).Order("id desc").Find(&books).Error
+	err := r.db.Order("id desc").Find(&books).Error
 
 	return books, err
 }
