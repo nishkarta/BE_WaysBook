@@ -18,9 +18,10 @@ type User struct {
 }
 
 type UserProfileResponse struct {
-	ID       int    `json:"id"`
-	FullName string `json:"fullName"`
-	Email    string `json:"email"`
+	ID             int               `json:"id"`
+	FullName       string            `json:"fullName"`
+	Email          string            `json:"email"`
+	PurchasedBooks UserBooksResponse `json:"PurchasedBooks"`
 }
 
 func (UserProfileResponse) TableName() string {
