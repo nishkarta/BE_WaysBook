@@ -103,6 +103,7 @@ func (h *handlerBook) AddBook(w http.ResponseWriter, r *http.Request) {
 
 	request := booksdto.AddBookRequest{
 		Title:           r.FormValue("title"),
+		Author:          r.FormValue("author"),
 		PublicationDate: r.FormValue("publication_date"),
 		Pages:           pages,
 		ISBN:            r.FormValue("isbn"),
@@ -137,8 +138,9 @@ func (h *handlerBook) AddBook(w http.ResponseWriter, r *http.Request) {
 
 	book := models.Book{
 		Title:           request.Title,
+		Author:          request.Author,
 		PublicationDate: request.PublicationDate,
-		Pages:           request.Price,
+		Pages:           request.Pages,
 		ISBN:            request.ISBN,
 		Price:           request.Price,
 		About:           request.About,
@@ -167,5 +169,124 @@ func (h *handlerBook) AddBook(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Code: "success", Data: book}
+	json.NewEncoder(w).Encode(response)
+}
+
+func (h *handlerBook) UpdateBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	coverContext := r.Context().Value("dataFile")
+	filepath := coverContext.(string)
+
+	pdfContext := r.Context().Value("dataPDF")
+	filename := pdfContext.(string)
+
+	price, _ := strconv.Atoi(r.FormValue("price"))
+	pages, _ := strconv.Atoi(r.FormValue("pages"))
+
+	request := booksdto.UpdateBookRequest{
+		Title:           r.FormValue("title"),
+		Author:          r.FormValue("author"),
+		PublicationDate: r.FormValue("publication_date"),
+		Pages:           pages,
+		ISBN:            r.FormValue("isbn"),
+		Price:           price,
+		About:           r.FormValue("about"),
+		File:            filename,
+		Cover:           filepath,
+	}
+
+	var ctx = context.Background()
+	var CLOUD_NAME = os.Getenv("CLOUD_NAME")
+	var API_KEY = os.Getenv("API_KEY")
+	var API_SECRET = os.Getenv("API_SECRET")
+
+	cld, _ := cloudinary.NewFromParams(CLOUD_NAME, API_KEY, API_SECRET)
+
+	resp, err := cld.Upload.Upload(ctx, filepath, uploader.UploadParams{Folder: "WaysBook"})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+
+	book, err := h.BookRepository.GetBookByID(int(id))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if request.Title != "" {
+		book.Title = request.Title
+	}
+	if request.Author != "" {
+		book.Author = request.Author
+	}
+	if request.PublicationDate != "" {
+		book.PublicationDate = request.PublicationDate
+	}
+	if request.Pages != 0 {
+		book.Pages = request.Pages
+	}
+	if request.ISBN != "" {
+		book.ISBN = request.ISBN
+	}
+	if request.Price != 0 {
+		book.Price = request.Price
+	}
+	if request.About != "" {
+		book.About = request.About
+	}
+	if request.File != "" {
+		book.File = request.File
+	}
+	if request.Cover != "" {
+		book.Cover = resp.SecureURL
+	}
+
+	data, err := h.BookRepository.UpdateBook(book)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	book, _ = h.BookRepository.GetBookByID(book.ID)
+	book.File = os.Getenv("PATH_FILE") + book.File
+
+	w.WriteHeader(http.StatusOK)
+	response := dto.SuccessResult{Code: "success", Data: data}
+	json.NewEncoder(w).Encode(response)
+
+}
+
+func (h *handlerBook) DeleteBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	id, _ := strconv.Atoi(mux.Vars(r)["id"])
+	book, err := h.BookRepository.GetBookByID(id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	data, err := h.BookRepository.DeleteBook(book)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	response := dto.SuccessResult{Code: "success", Data: data}
 	json.NewEncoder(w).Encode(response)
 }

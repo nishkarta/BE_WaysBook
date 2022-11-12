@@ -6,6 +6,7 @@ type LoginResponse struct {
 	Email    string `gorm:"type: varchar(255)" json:"email"`
 	Role     string `gorm:"type:varchar(255)" json:"role"`
 	Token    string `gorm:"type: varchar(255)" json:"token"`
+	Image    string `gorm:"type:varchar(255)" json:"image"`
 }
 
 type CheckAuthResponse struct {

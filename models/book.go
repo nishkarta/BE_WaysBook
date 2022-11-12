@@ -5,6 +5,7 @@ import "time"
 type Book struct {
 	ID              int       `json:"id" gorm:"primary_key:auto_increment"`
 	Title           string    `json:"title" gorm:"type:varchar(255)"`
+	Author          string    `json:"author" gorm:"type:varchar(255)"`
 	PublicationDate string    `json:"publication_date" gorm:"type:varchar(255)"`
 	Pages           int       `json:"pages" gorm:"type:int"`
 	ISBN            string    `json:"isbn" gorm:"type:varchar(255)"`
@@ -19,6 +20,7 @@ type Book struct {
 type UserBooksResponse struct {
 	ID              int    `json:"id"`
 	Title           string `json:"title"`
+	Author          string `json:"author"`
 	PublicationDate string `json:"publication_date"`
 	Pages           int    `json:"pages"`
 	ISBN            string `json:"isbn"`
