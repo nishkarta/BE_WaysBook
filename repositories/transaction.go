@@ -49,7 +49,7 @@ func (r *repository) GetTransactionByID(ID int) (models.Transaction, error) {
 
 func (r *repository) GetTransactionByCurrentUser(userID int) ([]models.Transaction, error) {
 	var transactions []models.Transaction
-	err := r.db.Preload("Buyer").Preload("Book").Where("user_id = ?", userID).Find(&transactions).Error
+	err := r.db.Preload("Buyer").Preload("Book").Where("buyer_id = ?", userID).Find(&transactions).Error
 
 	return transactions, err
 }
