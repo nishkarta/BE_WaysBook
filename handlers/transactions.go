@@ -65,7 +65,7 @@ func (h *handlerTransaction) AddTransaction(w http.ResponseWriter, r *http.Reque
 	}
 
 	var bookId []int
-	for _, r := range r.FormValue("product_id") {
+	for _, r := range r.FormValue("book_id") {
 		if int(r-'0') >= 0 {
 			bookId = append(bookId, int(r-'0'))
 		}
