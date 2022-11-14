@@ -88,10 +88,12 @@ func (h *handlerTransaction) AddTransaction(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
+	book, _ := h.TransactionRepository.FindBookByID(bookId)
+
 	transaction := models.Transaction{
 		ID:      TransactionId,
 		BuyerID: request.BuyerID,
-		BookID:  request.BookID,
+		Book:    book,
 		Total:   request.Total,
 		Status:  request.Status,
 	}
