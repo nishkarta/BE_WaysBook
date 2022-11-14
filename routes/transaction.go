@@ -15,6 +15,7 @@ func TransactionRoutes(r *mux.Router) {
 	h := handlers.HandlerTransaction(transactionRepository)
 
 	r.HandleFunc("/transactions", middleware.Auth(h.FindTransactions)).Methods("GET")
+	r.HandleFunc("/current-transactions", middleware.Auth(h.GetTransactionByCurrentUser)).Methods("GET")
 	r.HandleFunc("/transaction", middleware.Auth(h.AddTransaction)).Methods("POST")
 	r.HandleFunc("/notification", h.Notification).Methods("POST")
 }

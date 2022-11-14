@@ -13,6 +13,7 @@ type TransactionRepository interface {
 	UpdateTransaction(status string, ID string) error
 	GetTransactionByID(ID int) (models.Transaction, error)
 	GetOneTransaction(ID string) (models.Transaction, error)
+	GetTransactionByCurrentUser(userID int) ([]models.Transaction, error)
 	FindBookByID(BookID []int) ([]models.UserBooksResponse, error)
 }
 
@@ -44,6 +45,13 @@ func (r *repository) GetTransactionByID(ID int) (models.Transaction, error) {
 	err := r.db.First(&transaction, ID).Error
 
 	return transaction, err
+}
+
+func (r *repository) GetTransactionByCurrentUser(userID int) ([]models.Transaction, error) {
+	var transactions []models.Transaction
+	err := r.db.Preload("Buyer").Preload("Book").Where("user_id = ?", userID).Find(&transactions).Error
+
+	return transactions, err
 }
 
 func (r *repository) UpdateTransaction(status string, ID string) error {

@@ -191,3 +191,23 @@ func (h *handlerTransaction) Notification(w http.ResponseWriter, r *http.Request
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (h *handlerTransaction) GetTransactionByCurrentUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	userInfo := r.Context().Value("userInfo").(jwt.MapClaims)
+	id := int(userInfo["id"].(float64))
+
+	var transactions []models.Transaction
+	transactions, err := h.TransactionRepository.GetTransactionByCurrentUser(id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response := dto.ErrorResult{Code: http.StatusBadRequest, Message: err.Error()}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	response := dto.SuccessResult{Code: "success", Data: transactions}
+	json.NewEncoder(w).Encode(response)
+
+}
