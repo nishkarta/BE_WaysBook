@@ -64,11 +64,18 @@ func (h *handlerTransaction) AddTransaction(w http.ResponseWriter, r *http.Reque
 		// bookIds = append(bookIds, carts[i].BookID)
 	}
 
+	var bookId []int
+	for _, r := range r.FormValue("product_id") {
+		if int(r-'0') >= 0 {
+			bookId = append(bookId, int(r-'0'))
+		}
+	}
+
 	request := transactiondto.CreateTransactionRequest{
 		BuyerID: userId,
-		// BookID:  bookIds,
-		Total:  total,
-		Status: "pending",
+		BookID:  bookId,
+		Total:   total,
+		Status:  "pending",
 	}
 
 	var TransIdIsMatch = false
